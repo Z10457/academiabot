@@ -1,24 +1,22 @@
+from google import genai
 from datetime import date
 
-assignments = {}
+assignment_list = []
 
-def add_assignment(course: str, assignment_name:str , due_date: str):
-    """Add an assignment with its course , title and due date."""
-    try:
-        date.isocalendar(due_date)
+def add_assignment(course:str, assignment_name:str, due_date:str ):
+    try: 
+        parsed = date.fromisoformat(due_date)
     except ValueError: 
-        raise ValueError("Due date must be in YYYY-MM-DD format.")
+        return ValueError("Invalid date format, please use YYYY-MM-DD")
+    item = {"due_date": due_date, "course": course, "assignment_name": assignment_name}
+    assignment_list.append(item)
 
-    assignment_id = len(assignments) + 1
-    assignments[assignment_id] = {
-        "id": assignment_id,
-        "course": course, 
-        "due_date": due_date,
-        "assignment_name": assignment_name,
-        "completed": False,
-    }
+    return ({"success": True, "assignment": item})
 
-    return {
-        "Success": True,
-        "assignment_id": assignments[assignment_id],
-    }
+print(add_assignment("Calc", "Exam 1", "2026-11-12"))
+print(add_assignment("Calc", "Exam 1", "11/12/2026"))
+print(add_assignment("Calc", "Exam 1", "2026-01-12"))
+print(assignment_list)
+
+ #modify the code so when you print the list, the assignments are in order of due dates. makes it easier for student. 
+
