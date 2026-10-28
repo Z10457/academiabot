@@ -2,7 +2,7 @@ import os
 import json
 import subprocess
 from dotenv import load_dotenv
-from tools import add_assignment
+from tools import add_assignment, add_syllabus
 from google import genai
 from google.genai import types
 from datetime import date
@@ -18,11 +18,11 @@ if not api_key :
 client = genai.Client(api_key=api_key)
 MODEL = "gemini-3.5-flash-lite"
 
-SYSTEM_PROMPT = {f"Today is {date.today()}. "}
+SYSTEM_PROMPT = {f"Today is {date.today()}. " "When the User shares the syllabus file, read it and add every assignment which you found in it using the tool add_assignment"}
 
 config = types.GenerateContentConfig( #this creates config.
     system_instruction=SYSTEM_PROMPT,
-    tools = [add_assignment], 
+    tools = [add_assignment, add_syllabus], 
 )
 
 

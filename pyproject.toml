@@ -4,7 +4,10 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.9"
-dependencies = ["google-genai"]
+dependencies = [
+    "google-genai",
+    "pypdf>=6.21.3",
+]
 
 [project.scripts]
 academia-agent = "academia_agent:main"
