@@ -86,3 +86,23 @@ If the file is invalid or could not be read, return an appropriate error message
     #give them the option to combine the syllabuses, so the dates are stacked up.
 
 
+def list_assignments(course:str = ""):
+    """Return the saved assignments, sorted by due_date.
+
+    Use this when the user asks what is on their assignment list.
+
+    Args:
+        optional, it will filter for one course.
+
+    """
+    results = assignment_list
+    if course:
+        results = [assignment for assignment in assignment_list if assignment["course"] == course]
+
+    if not results:
+        return{"success": True, "assignment_list":[], "message": "No assignment has been saved yet."}
+
+    return{"success": True, "assignment_list": sorted(results, key=lambda assignment: assignment["due_date"])}
+
+
+
