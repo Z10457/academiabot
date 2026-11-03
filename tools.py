@@ -105,4 +105,24 @@ def list_assignments(course:str = ""):
     return{"success": True, "assignment_list": sorted(results, key=lambda assignment: assignment["due_date"])}
 
 
+import json
+
+def load_assignment():
+
+    if not os.path.exists(file_path):
+        return []
+    with open(file_path) as f:
+        return json.load(f)
+    
+    
+def save_assignment():
+    with open(file_path, "w") as f:
+        json.dump(assignment_list, f, indent = 2)
+
+syllabus = load_syllabus()
+
+
+
+
+
 
