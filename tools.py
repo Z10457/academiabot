@@ -1,4 +1,4 @@
-from google import genai
+import json
 from datetime import date
 from pypdf import PdfReader
 from pypdf.errors import PdfReadError
@@ -7,13 +7,23 @@ from docx import Document
 from docx.opc.exceptions import PackageNotFoundError
  
 
+FILE = "assignments.json"
 
-today = date.today()
-print(today)
-
-assignment_list = []
 
 def add_assignment(course:str, assignment_name:str, due_date:str ):
+
+    """Save one assignment with its course, name, and due date.
+
+    Use this when the user mentions a deadline, or after reading a syllabus,
+    once for every assignment and exam found. If the date is relative, such
+    as "next Friday", work out the real date from today's date first.
+
+    Args:
+        course: The course name or code, e.g. "Calc 2".
+        assignment_name: The assignment or exam name, e.g. "Exam 1".
+        due_date: The due date in YYYY-MM-DD format, e.g. "2026-11-12".
+     """
+        
     try: 
         parsed = date.fromisoformat(due_date)
     except ValueError: 
@@ -21,10 +31,10 @@ def add_assignment(course:str, assignment_name:str, due_date:str ):
     item = {"due_date": due_date, "course": course, "assignment_name": assignment_name}
     assignment_list.append(item)
 
+    save_assignment()
     return ({"success": True, "assignment": item})
 
-
- #modify the code so when you print the list, the assignments are in order of due dates. makes it easier for student. 
+ 
 
 def read_pdf(file_path:str): 
     reader = PdfReader(file_path)
@@ -49,16 +59,17 @@ def read_docx(file_path:str):
     return doc_text 
 
 
-def add_syllabus(file_path:str):
+def read_syllabus(file_path:str):
+
+    """Read a syllabus file and return its text. This does not save anything.
+
+    Use this when the user gives a file path to their syllabus. Afterwards,
+    find every assignment and exam in the text and save each one with
+    add_assignment. Supports PDF and Word (.docx) files only.
+
+    Args:
+        file_path: The full path to the syllabus file on the user's computer.
     """
-When the user uploads their syllabus, first check whether they uploaded it.
-That is where the `if not os.path...` line comes in.
-
-Then, if they uploaded it, check whether it is a PDF or DOC/DOCX file.
-If it is neither, ask them to upload it in one of those formats.
-
-If the file is invalid or could not be read, return an appropriate error message.
-""" 
     if not os.path.exists(file_path):
         return{"success": False, "message": "File not found."}
     ext = os.path.splitext(file_path)[1].lower()
@@ -87,13 +98,13 @@ If the file is invalid or could not be read, return an appropriate error message
 
 
 def list_assignments(course:str = ""):
-    """Return the saved assignments, sorted by due_date.
+    """Return the saved assignments, sorted by due date with the soonest first.
 
-    Use this when the user asks what is on their assignment list.
+    Use this when the user asks what is due, what is coming up, or wants to
+    see their assignments.
 
     Args:
-        optional, it will filter for one course.
-
+        course: Optional. If given, only return assignments for this course.
     """
     results = assignment_list
     if course:
@@ -109,19 +120,44 @@ import json
 
 def load_assignment():
 
-    if not os.path.exists(file_path):
+    if not os.path.exists(FILE):
         return []
-    with open(file_path) as f:
+    with open(FILE) as f:
         return json.load(f)
     
     
 def save_assignment():
-    with open(file_path, "w") as f:
+    with open(FILE, "w") as f:
         json.dump(assignment_list, f, indent = 2)
 
-syllabus = load_syllabus()
+assignment_list = load_assignment()
 
 
+def calculate_average(grades):
+	
+    total = sum(grades)
+    count = len(grades)
+    average = total/count
+    return (average)
+
+GRADE_SCALE = [
+    (93, 'A',  4.00),
+    (90, 'A-', 3.67),
+    (87, 'B+', 3.33),
+    (83, 'B',  3.00),
+    (80, 'B-', 2.67),
+    (77, 'C+', 2.33),
+    (73, 'C',  2.00),
+    (70, 'C-', 1.67),
+    (60, 'D',  1.00),
+]
+
+def get_letter_grade(average):
+    for cutoff, letter,gpa  in GRADE_SCALE:
+        if average >= cutoff:
+            return letter,gpa
+        
+    return 'F', 0.00
 
 
 

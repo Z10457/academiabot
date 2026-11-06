@@ -1,0 +1,12 @@
+[
+  {
+    "due_date": "2026-03-30",
+    "course": "Databases",
+    "assignment_name": "Database Quiz"
+  },
+  {
+    "due_date": "2026-11-09",
+    "course": "Database and Management",
+    "assignment_name": "Database and Management Quiz"
+  }
+]
