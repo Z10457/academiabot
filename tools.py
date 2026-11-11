@@ -5,11 +5,73 @@ from pypdf.errors import PdfReadError
 import os
 from docx import Document 
 from docx.opc.exceptions import PackageNotFoundError
+import requests
+from dotenv import load_dotenv
  
 
 FILE = "assignments.json"
 
+load_dotenv()
 
+api_key = os.getenv("OPENALEX_API_KEY") 
+
+if not api_key : 
+    raise ValueError("No API key found.")
+
+def search_papers(query: str, free_only: bool = True, limit:int = 5)-> dict:
+       
+       """ Use this when the user wants academic or scholarly papers on a topic.
+    Each paper includes a free_link when a free copy exists; share it with the student.
+    Only mention papers that appear in the results. Never invent papers or links.
+
+    Args:
+        query: The topic or keywords to search for, e.g. "climate change agriculture".
+        free_only: If True (default), only return papers that are free to read online.
+        limit: How many papers to return, from 1 to 10. Defaults to 5.
+    """
+       if not query.strip():
+           return{"success": False, "message": "Please give us a topic to search for."}
+       limit = max(1,min(limit,10))
+
+       params = {"search": query, "per-page": limit, "api_key": api_key}
+       if free_only : 
+           params["filter"]= "is_oa:true"
+
+       mailto = os.getenv("OPENALEX_MAILTO")
+       if mailto:
+           params["mailto"] = mailto
+       try:
+           response = requests.get(
+               "https://api.openalex.org/works",
+               params = params,
+               timeout=10
+           )
+           response.raise_for_status()
+           data = response.json()
+       
+       except requests.RequestException:
+           return{"success":False, "message": "The paper search has failed so try again in a moment."}
+
+       papers = []
+       for work in data.get("results", []):
+           authors = [
+               a.get("author", {}).get("display_name")
+               for a in work.get("authorships",[])[:3]
+           ]
+           free_link = (work.get("open_access") or {}).get("oa_url")
+           papers.append({
+               "title": work.get("display_name"),  
+                "year": work.get("publication_year"),  
+                "authors": [name for name in authors if name],  # drops any missing (None) names
+                "cited_by": work.get("cited_by_count"),  
+                "link": work.get("doi") or work.get("id"),
+                "free_link": free_link,
+           })
+       if not papers:
+            return{"success":True,"papers" : [], "message": "No papers found for that search." }
+           
+       return {"success":True, "papers": papers}
+    
 def add_assignment(course:str, assignment_name:str, due_date:str ):
 
     """Save one assignment with its course, name, and due date.
@@ -162,3 +224,6 @@ def get_letter_grade(average):
 
 
 
+print(search_papers("climate change agriculture"))
+print(search_papers("asdkjhqwe"))
+print(search_papers("   "))

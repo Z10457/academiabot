@@ -2,7 +2,7 @@ import os
 import json
 import subprocess
 from dotenv import load_dotenv
-from tools import add_assignment, read_syllabus, list_assignments
+from tools import add_assignment, read_syllabus, list_assignments, search_papers
 from google import genai
 from google.genai import types
 from datetime import date
@@ -36,7 +36,7 @@ print(SYSTEM_PROMPT)
 
 config = types.GenerateContentConfig( #this creates config.
     system_instruction=SYSTEM_PROMPT,
-    tools = [add_assignment, read_syllabus, list_assignments], 
+    tools = [add_assignment, read_syllabus, list_assignments, search_papers], 
 )
 
 
