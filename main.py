@@ -32,7 +32,7 @@ SYSTEM_PROMPT = (
     "If a tool returns success: False, tell the user its message."
 )
 
-print(SYSTEM_PROMPT)
+
 
 config = types.GenerateContentConfig( #this creates config.
     system_instruction=SYSTEM_PROMPT,
