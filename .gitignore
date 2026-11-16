@@ -13,3 +13,5 @@ wheels/
 assighments.json
 
 uploads/
+
+supabase_test.py

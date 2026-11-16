@@ -1,47 +1,31 @@
-import sqlite3
+def assignment_exists(client, course, assignment_name, due_date):  # client = the logged-in Supabase client; the rest describe one assignment
+    result = (  # parentheses let one long chain of calls span several lines
+        client.table("assignments")  
+        .select("id")  # we only need to know whether a row exists, so fetch just the id column
+        .eq("course", course)  # .eq means "equals": keeps rows whose course column matches
+        .eq("assignment_name", assignment_name)  
+        .eq("due_date", due_date)  # all three must match, so this is an exact-duplicate check
+        .limit(1)  # stop looking after the first match; one is enough to know it exists
+        .execute()  # sends the request; until this line, you were only describing the query
+    )
+    return len(result.data) > 0  
 
-DB_FILE = "user.db"
 
-def get_connection():
-    return sqlite3.connect(DB_FILE)
+def add_assignment_row(client, course, assignment_name, due_date):
+    client.table("assignments").insert({ 
+        "course": course,  # column name on the left in quotes, your variable on the right with no quotes
+        "assignment_name": assignment_name,
+        "due_date": due_date,  # Supabase expects YYYY-MM-DD text here and turns it into a real date
+    }).execute()  # user_id is missing on purpose: the database fills it from the login
 
-def init_db():
-    with get_connection() as conn : 
-        conn.execute(
-            "CREATE IF NOT EXISTS assignments(" 
-            "id INTEGER PRIMARY KEY, "
-            "user_id TEXT NOT NULL, "
-            "course TEXT, assignment_name TEXT , due_date TEXT, "
-            "completed INTEGER DEFAULT 0)"
-        )
 
-def assignment_exists (course, user_id, assignment_name, due_date):
-    with get_connection() as conn:
-        row = conn.execute(
-            "SELECT 1 FROM assignments WHERE course = ? AND user_id = ? AND assignment_name = ? AND due_date = ?",
-            (course, user_id, assignment_name, due_date), #this is the tuple which it selects from, the question marks abobve.
-        ).fetchone()
-    return row is not None
-
-def add_assignment_row(course, user_id, assignment_name, due_date):
-    with get_connection() as conn:
-        conn.execute(
-            "INSERT INTO assignments (course, user_id, assignment_name, due_date) VALUES (?, ?, ?, ?)"
-            (course, user_id, assignment_name, due_date),
-        )
-
-def list_assignment(course ="", user_id) :
-    query = "SELECT course, id , assignment_name, due_date, completed FROM assignments WHERE user_id = ?"
-    params = [user_id]
-    if course:
-        query += " AND LOWER(course) = ?"
-        params.append(course.lower())
-    query += " ORDER BY user_id"
-    with get_connection() as conn:
-        rows = conn.execute(query, params).fetchall()
-    return [
-        {"course": r[0], "id": r[1], "assignment_name": r[2], "due_date": r[3], "completed" : bool(r[4])}
-        for r in rows
-    ]
-
-init_db()
+def list_assignment_rows(client, course=""):  # course="" means the filter is optional, like in your old list_assignments
+    result = (
+        client.table("assignments")
+        .select("id, course, assignment_name, due_date, completed")  # the columns to fetch, separated by commas
+        .order("due_date")  
+    )
+    rows = result.data  # a list of dicts, one per assignment, and only the logged-in user's rows come back
+    if course:  # only filter when a course was given
+        rows = [r for r in rows if r["course"].lower() == course.lower()]  
+    return rows  # hand the list back; the tools will wrap it in a success dict
