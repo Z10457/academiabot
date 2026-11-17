@@ -13,7 +13,3 @@ def make_tools(owner):
 
     return [add_notes, list_notes]
 
-A_tools = make_tools("A")
-Zee_tools = make_tools("Zee")
-    
-
