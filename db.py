@@ -1,3 +1,23 @@
+import os 
+from dotenv import load_dotenv
+from supabase import create_client
+
+load_dotenv()
+
+url = os.getenv("SUPABASE_URL")  
+key = os.getenv("SUPABASE_PUBLISHABLE_KEY")  
+
+if not url :  # None means a name didn't match a line in .env
+    raise SystemExit("Missing SUPABASE_URL in .env")  # stops with a clear message instead of a confusing error later
+if not key :
+    raise SystemExit("Missing SUPABASE_PUBLISHABLE_KEY")
+
+
+def new_client():
+    return create_client(url, key)
+
+
+
 def assignment_exists(client, course, assignment_name, due_date):  # client = the logged-in Supabase client; the rest describe one assignment
     result = (  # parentheses let one long chain of calls span several lines
         client.table("assignments")  
@@ -24,6 +44,7 @@ def list_assignment_rows(client, course=""):  # course="" means the filter is op
         client.table("assignments")
         .select("id, course, assignment_name, due_date, completed")  # the columns to fetch, separated by commas
         .order("due_date")  
+        .execute()
     )
     rows = result.data  # a list of dicts, one per assignment, and only the logged-in user's rows come back
     if course:  # only filter when a course was given
