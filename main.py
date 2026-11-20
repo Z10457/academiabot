@@ -2,13 +2,16 @@ import os
 import json
 import subprocess
 from dotenv import load_dotenv
-from tools import add_assignment, read_syllabus, list_assignments, search_papers
+from tools import make_tools
+from db import new_client
 from google import genai
 from google.genai import types
 from datetime import date
+from getpass import getpass
 
 
 load_dotenv()
+
 
 api_key = os.getenv("GEMINI_API_KEY") 
 
@@ -16,7 +19,7 @@ api_key = os.getenv("GEMINI_API_KEY")
 if not api_key : 
     raise ValueError("No API key found.")
 
-client = genai.Client(api_key=api_key)
+gemini = genai.Client(api_key=api_key)
 MODEL = "gemini-3.5-flash-lite"
 
 
@@ -34,26 +37,30 @@ SYSTEM_PROMPT = (
 
 
 
-config = types.GenerateContentConfig( #this creates config.
-    system_instruction=SYSTEM_PROMPT,
-    tools = [add_assignment, read_syllabus, list_assignments, search_papers], 
-)
+def build_config(tools):
+    return types.GenerateContentConfig(
+        system_instruction=SYSTEM_PROMPT,
+        tools=tools,
+    )
 
 
 
-def run_agent(messages) :
-
-    while True:
-        print("Running agent...")
-        response = client.models.generate_content(
-            model=MODEL,
-            contents = messages,
-            config = config
-        )
-        return(response.text)
+def run_agent(messages, config) :
+    response = gemini.models.generate_content(
+        model= MODEL, contents = messages, config=config
+    )
+    
+    return(response.text)
 
 
 def main():
+    db_client = new_client()
+    email = input("Please enter your email: ")
+    password = getpass("Please enter your password: ")
+
+    db_client.auth.sign_in_with_password({"email": email, "password":password})
+
+    config = build_config(make_tools(db_client))
     messages = [] #this allows our agent to remember the conversation and not forget it after one input.
     print ("Hi! Today is " + str(date.today().strftime('%A'))+ ", I am your academic assistant: what do you need assistance with? ")
     while True: #this allows the user to keep entering prompts.
@@ -62,7 +69,7 @@ def main():
             break
         
         messages.append({"role": "user", "parts": [{"text": user_input}]}) #we take their user input and add to messsages. 
-        bot_reply = run_agent(messages) #we run the agent. so we keep going until user does quit. 
+        bot_reply = run_agent(messages, config) #we run the agent. so we keep going until user does quit. 
         messages.append({"role": "model", "parts": [{"text": bot_reply}]}) 
         print(f"\nAgent: {bot_reply}")
 
