@@ -30,7 +30,7 @@ def search_papers(query: str, free_only: bool = True, limit:int = 5)-> dict:
 
        api_key = os.getenv("OPENALEX_API_KEY") 
        if not api_key : 
-           raise ValueError("No API key found.")
+           return{"success": False, "message": "We are missing the API key."}
 
        params = {"search": query, "per-page": limit, "api_key": api_key}
        if free_only : 

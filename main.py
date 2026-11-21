@@ -58,8 +58,11 @@ def main():
     email = input("Please enter your email: ")
     password = getpass("Please enter your password: ")
 
-    db_client.auth.sign_in_with_password({"email": email, "password":password})
-
+    try:
+        db_client.auth.sign_in_with_password({"email": email, "password":password})
+    except Exception:
+        print("Login failed. Check your email and password.")
+        return
     config = build_config(make_tools(db_client))
     messages = [] #this allows our agent to remember the conversation and not forget it after one input.
     print ("Hi! Today is " + str(date.today().strftime('%A'))+ ", I am your academic assistant: what do you need assistance with? ")
