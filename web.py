@@ -7,6 +7,16 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 st.title("Academia Agent")
 
+if "client" not in st.session_state:
+    st.session_state["client"] = None
+
+email = st.text_input("Email: ")
+password = st.text_input("Password", type = "password")
+
+if st.button("Log in"):
+    pass
+
+
 if "messages" not in st.session_state :
     st.session_state.messages = []
 if "last_upload" not in st.session_state : 
