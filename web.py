@@ -30,7 +30,7 @@ if st.session_state["client"] is None:
         else:
             st.session_state["client"] = client #saves the client for whatever acc he is, keeps him logged in.
             st.rerun()
-    if st.button("Continue as guest (YOUR INFO WONT BE SAVED) "):
+    if st.button("Continue as guest (YOUR INFO WONT BE SAVED) "): 
         client = new_client()
         try:
             client.auth.sign_in_anonymously()
