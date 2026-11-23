@@ -64,15 +64,23 @@ for m in st.session_state.messages:
 prompt = st.chat_input("What may I help you with today")
 if prompt:
     if uploaded and uploaded.name != st.session_state.last_upload:
+        if st.session_state["is_guest"] and st.session_state.last_upload :
+            st.warning("Guests can only upload one syllabus, to make more you will need to create an account.")
+            st.stop()
         path = os.path.join(UPLOAD_DIR, os.path.basename(uploaded.name))
         with open(path, "wb") as f:
             f.write(uploaded.getbuffer())
         st.session_state.last_upload = uploaded.name
-        prompt += f"\n(The user uploaded the syllabus saved at {path})"
+
+        st.session_state["uploads_used"] += 1
+
+        prompt += f"\n(The user uploaded the syllabus at {path})"
 
     st.session_state.messages.append({"role": "user", "parts": [{"text":prompt }]})
     reply = run_agent(st.session_state.messages, st.session_state["config"])
     st.session_state.messages.append({"role": "model", "parts": [{"text":reply }]})
     st.rerun()
+
+
         
 
