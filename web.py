@@ -9,6 +9,9 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 st.title("Academia Agent")
 
+if "uploads_used" not in st.session_state:
+    st.session_state["uploads_used"] = 0
+
 if "client" not in st.session_state:
     st.session_state["client"] = None
 
@@ -44,6 +47,7 @@ if st.session_state["client"] is None:
 
 if st.session_state["config"] is None:
     st.session_state["config"] = build_config(make_tools(st.session_state["client"]))
+
 
 if "messages" not in st.session_state :
     st.session_state.messages = []
