@@ -21,6 +21,9 @@ if "is_guest" not in st.session_state:
 if "config" not in st.session_state:
     st.session_state["config"] = None
 
+if "user_dir" not in st.session_state:
+    st.session_state["user_dir"] = None
+
 if st.session_state["client"] is None:
     email = st.text_input("Email: ")
     password = st.text_input("Password", type = "password")
@@ -48,6 +51,11 @@ if st.session_state["client"] is None:
 if st.session_state["config"] is None:
     st.session_state["config"] = build_config(make_tools(st.session_state["client"]))
 
+if st.session_state["user_dir"] is None:
+    user_id = st.session_state["client"].auth.get_user().user.id
+    folder = os.path.join(UPLOAD_DIR, user_id)
+    os.makedirs(folder, exist_ok=True)
+    st.session_state["user_dir"] = folder
 
 if "messages" not in st.session_state :
     st.session_state.messages = []
@@ -67,7 +75,7 @@ if prompt:
         if st.session_state["is_guest"] and st.session_state.last_upload :
             st.warning("Guests can only upload one syllabus, to make more you will need to create an account.")
             st.stop()
-        path = os.path.join(UPLOAD_DIR, os.path.basename(uploaded.name))
+        path = os.path.join(st.session_state["user_dir"], os.path.basename(uploaded.name))
         with open(path, "wb") as f:
             f.write(uploaded.getbuffer())
         st.session_state.last_upload = uploaded.name

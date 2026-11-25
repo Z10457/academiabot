@@ -20,7 +20,7 @@ if not api_key :
     raise ValueError("No API key found.")
 
 gemini = genai.Client(api_key=api_key)
-MODEL = "gemini-3.1-flash-lite" #changed it to 3.1 when error 503 is the result. regular base is 3.5
+MODEL = "gemini-3.5-flash-lite" #changed it to 3.1 when error 503 is the result. regular base is 3.5
 
 
 SYSTEM_PROMPT = (
