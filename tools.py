@@ -95,44 +95,6 @@ def read_docx(file_path:str):
     return doc_text 
 
 
-def read_syllabus(file_path:str):
-
-    """Read a syllabus file and return its text. This does not save anything.
-
-    Use this when the student gives a file path to their syllabus. Afterwards,
-    find every assignment and exam in the text and save each one with
-    add_assignment. Supports PDF and Word (.docx) files only.
-
-    Args:
-        file_path: The full path to the syllabus file on the student's computer.
-    """
-
-    if not os.path.exists(file_path):
-        return{"success": False, "message": "File not found."}
-    ext = os.path.splitext(file_path)[1].lower()
-    try: 
-        if ext == ".pdf":
-            text = read_pdf(file_path)
-        elif ext == ".docx":
-            text = read_docx(file_path)
-        else:
-            return{"success":False, "message": "Please upload a PDF or a Word Doc"}
-
-
-    except PdfReadError:
-        return{"success": False, "message": "Invalid file"}
-    except PackageNotFoundError:
-        return{"success": False, "message": "The word file could not be read."}
-        
-    if not text.strip(): #empty or whitespace only
-        return{"success": False, "message": "File is empty"}
-
-        
-    return {"success" : True, "text": text }
-
-    #add more tools such as reading doc and not just pdf
-    #give them the option to combine the syllabuses, so the dates are stacked up.
-
 
 def calculate_average(grades):
 	
@@ -160,7 +122,46 @@ def get_letter_grade(average):
         
     return 'F', 0.00
 
-def make_tools(client):
+def make_tools(client, user_dir):
+    def read_syllabus(file_path:str):
+
+        """Read a syllabus file and return its text. This does not save anything.
+
+    Use this when the student gives a file path to their syllabus. Afterwards,
+    find every assignment and exam in the text and save each one with
+    add_assignment. Supports PDF and Word (.docx) files only.
+
+    Args:
+        file_path: The full path to the syllabus file on the student's computer.
+        user_dir: The directory where the student's files are stored.
+    """
+
+        if not os.path.exists(file_path):
+            return{"success": False, "message": "File not found."}
+        ext = os.path.splitext(file_path)[1].lower()
+        try: 
+            if ext == ".pdf":
+                text = read_pdf(file_path)
+            elif ext == ".docx":
+                text = read_docx(file_path)
+            else:
+                return{"success":False, "message": "Please upload a PDF or a Word Doc"}
+
+
+        except PdfReadError:
+            return{"success": False, "message": "Invalid file"}
+        except PackageNotFoundError:
+            return{"success": False, "message": "The word file could not be read."}
+        
+        if not text.strip(): #empty or whitespace only
+            return{"success": False, "message": "File is empty"}
+
+        
+        return {"success" : True, "text": text }
+
+    #add more tools such as reading doc and not just pdf
+    #give them the option to combine the syllabuses, so the dates are stacked up.
+
     def add_assignment(course:str, assignment_name: str, due_date: str):
         """Save one assignment, exam, or deadline for the student.
 

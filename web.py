@@ -48,14 +48,15 @@ if st.session_state["client"] is None:
             st.rerun()
     st.stop()
 
-if st.session_state["config"] is None:
-    st.session_state["config"] = build_config(make_tools(st.session_state["client"]))
-
 if st.session_state["user_dir"] is None:
     user_id = st.session_state["client"].auth.get_user().user.id
     folder = os.path.join(UPLOAD_DIR, user_id)
     os.makedirs(folder, exist_ok=True)
     st.session_state["user_dir"] = folder
+
+if st.session_state["config"] is None:
+    st.session_state["config"] = build_config(make_tools(st.session_state["client"], st.session_state["user_dir"])) #moved this to under , so the folder is made first and then the toolbox.
+
 
 if "messages" not in st.session_state :
     st.session_state.messages = []

@@ -63,7 +63,7 @@ def main():
     except Exception:
         print("Login failed. Check your email and password.")
         return
-    config = build_config(make_tools(db_client))
+    config = build_config(make_tools(db_client, st.session_state["user_dir"]))
     messages = [] #this allows our agent to remember the conversation and not forget it after one input.
     print ("Hi! Today is " + str(date.today().strftime('%A'))+ ", I am your academic assistant: what do you need assistance with? ")
     while True: #this allows the user to keep entering prompts.
