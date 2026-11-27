@@ -95,7 +95,7 @@ def read_docx(file_path:str):
     return doc_text 
 
 
-
+#this is for calculating the average of grades and returning the letter grade and GPA based on the average, if you want to impliment it later on.
 def calculate_average(grades):
 	
     total = sum(grades)
@@ -135,6 +135,11 @@ def make_tools(client, user_dir):
         file_path: The full path to the syllabus file on the student's computer.
         user_dir: The directory where the student's files are stored.
     """
+        real_dir = os.path.abspath(user_dir) #returns the absolute path of the user_dir, which is the full path from the root directory to the user_dir.
+        real_file = os.path.abspath(file_path) #in simple words abspath returns the absolute path of the file, which is the full path from the root directory to the file. 
+
+        if os.path.commonpath([real_dir, real_file]) != real_dir: #this checks if the file is in the user_dir or not.
+            return{"success": False, "message": "Please upload your syllabus."}
 
         if not os.path.exists(file_path):
             return{"success": False, "message": "File not found."}
