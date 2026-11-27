@@ -63,7 +63,10 @@ def main():
     except Exception:
         print("Login failed. Check your email and password.")
         return
-    config = build_config(make_tools(db_client, st.session_state["user_dir"]))
+    user_id = db_client.auth.get_user().user.id #this gets the user id of the logged in user.
+    folder = os.path.join("uploads", user_id) #this creates a folder for the user in the uploads directory, so that each user has their own folder to store their files.
+    os.makedirs(folder, exist_ok= True)
+    config = build_config(make_tools(db_client, folder)) #this builds the tools for the agent, so that it can use them to read the syllabus and add assignments.
     messages = [] #this allows our agent to remember the conversation and not forget it after one input.
     print ("Hi! Today is " + str(date.today().strftime('%A'))+ ", I am your academic assistant: what do you need assistance with? ")
     while True: #this allows the user to keep entering prompts.
